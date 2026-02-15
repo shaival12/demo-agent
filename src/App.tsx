@@ -4,7 +4,11 @@ import { ControlPanel } from './components/ControlPanel';
 import { VideoPlayer } from './components/VideoPlayer';
 import { avatars } from './config/avatars';
 import { useSpeechSynthesis } from './hooks/useSpeechSynthesis';
-import { selectVoiceByAccent, selectVoiceByGender } from './utils/voiceSelector';
+import {
+  selectVoiceByAccent,
+  selectVoiceByGender,
+  selectVoiceDeepMale,
+} from './utils/voiceSelector';
 
 function App() {
   const [selectedAvatarId, setSelectedAvatarId] = useState(avatars[0].id);
@@ -16,11 +20,17 @@ function App() {
   const selectedAvatar = avatars.find((a) => a.id === selectedAvatarId) || avatars[0];
 
   const handleSpeak = () => {
+    const deepMaleVoice =
+      selectedAvatar.voicePreference === 'deep' && selectVoiceDeepMale(voices);
     const genderVoice =
       selectedAvatar.voiceGender && selectVoiceByGender(voices, selectedAvatar.voiceGender);
     const accentVoice = selectVoiceByAccent(voices, selectedAvatar.accent ?? 'default');
     const voice =
-      genderVoice || accentVoice || voices[selectedAvatar.voiceIndex ?? 0] || voices[0];
+      deepMaleVoice ||
+      genderVoice ||
+      accentVoice ||
+      voices[selectedAvatar.voiceIndex ?? 0] ||
+      voices[0];
     speak(
       script,
       {

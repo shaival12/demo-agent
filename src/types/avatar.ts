@@ -1,4 +1,4 @@
-export type AvatarAccent = 'italian' | 'british' | 'australian' | 'default';
+export type AvatarAccent = 'italian' | 'british' | 'australian' | 'german' | 'default';
 
 export interface Avatar {
   id: string;
@@ -15,6 +15,8 @@ export interface Avatar {
   /** Real-person talking video (mp4); plays when speaking, overrides talkingGifUrl if set */
   talkingVideoUrl?: string;
   voiceGender?: 'male' | 'female';
+  /** Prefer deepest male voice (e.g. Arnold-style commanding) */
+  voicePreference?: 'deep';
 }
 
 export interface SpeechConfig {

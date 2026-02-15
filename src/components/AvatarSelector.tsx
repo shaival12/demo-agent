@@ -50,7 +50,7 @@ export function AvatarSelector({
       <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
         Select Avatar
       </h2>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-3 gap-2">
         {avatars.map((avatar) => {
           const isSelected = avatar.id === selectedAvatarId;
           const showTalking = isSelected && isSpeaking;

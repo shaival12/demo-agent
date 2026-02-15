@@ -1,19 +1,24 @@
+export type Accent = 'italian' | 'british' | 'australian' | 'german' | 'default';
+
 export function findVoiceByAccent(
   voices: SpeechSynthesisVoice[],
-  accent: 'italian' | 'british' | 'australian' | 'default'
+  accent: Accent
 ): SpeechSynthesisVoice | undefined {
   const accentPatterns: Record<string, RegExp> = {
     italian: /italian|it-IT|it_IT/i,
     british: /british|en-GB|en_GB|uk|england/i,
     australian: /australian|au|en-AU|en_AU|australia/i,
+    german: /german|de-DE|de_DE|austrian|de-AT|de_AT/i,
   };
 
   if (accent === 'default') {
     const def = voices.find((v) => v.default);
     if (def) return def;
-    // Prefer natural/enhanced voices when no default
+    // Prefer soft/warm then natural voices by default
     const sorted = [...voices].sort(
-      (a, b) => scoreNaturalVoice(b.name) - scoreNaturalVoice(a.name)
+      (a, b) =>
+        scoreSoftWarmVoice(b.name) - scoreSoftWarmVoice(a.name) ||
+        scoreNaturalVoice(b.name) - scoreNaturalVoice(a.name)
     );
     return sorted[0] || voices[0];
   }
@@ -30,6 +35,7 @@ export function findVoiceByAccent(
     if (accent === 'italian') return lang.startsWith('it');
     if (accent === 'british') return lang.includes('gb') || lang.includes('en-gb');
     if (accent === 'australian') return lang.includes('au') || lang.includes('en-au');
+    if (accent === 'german') return lang.startsWith('de');
     return false;
   });
 
@@ -38,7 +44,7 @@ export function findVoiceByAccent(
 
 export function selectVoiceByAccent(
   voices: SpeechSynthesisVoice[],
-  accent: 'italian' | 'british' | 'australian' | 'default'
+  accent: Accent
 ): SpeechSynthesisVoice | null {
   if (voices.length === 0) return null;
   return findVoiceByAccent(voices, accent) || null;
@@ -54,10 +60,16 @@ const FEMALE_VOICE_PATTERNS =
  * For celebrity-style or custom voices, use an external TTS API (e.g. ElevenLabs, Play.ht).
  */
 const NATURAL_VOICE_PATTERNS = /enhanced|premium|natural|google|quality|eloquent/i;
+const SOFT_WARM_VOICE_PATTERNS = /soft|warm|gentle|calm|melody|smooth|friendly/i;
 
 function scoreNaturalVoice(name: string): number {
   if (NATURAL_VOICE_PATTERNS.test(name)) return 2;
   if (/microsoft|apple/i.test(name)) return 1;
+  return 0;
+}
+
+function scoreSoftWarmVoice(name: string): number {
+  if (SOFT_WARM_VOICE_PATTERNS.test(name)) return 2;
   return 0;
 }
 
@@ -77,12 +89,20 @@ export function findVoiceByGender(
     // Fallback: use any voice that doesn't sound female (avoids wrong gender)
     const notFemale = voices.filter((v) => !excludePattern.test(v.name));
     if (notFemale.length > 0) {
-      notFemale.sort((a, b) => scoreNaturalVoice(b.name) - scoreNaturalVoice(a.name));
+      notFemale.sort(
+        (a, b) =>
+          scoreSoftWarmVoice(b.name) - scoreSoftWarmVoice(a.name) ||
+          scoreNaturalVoice(b.name) - scoreNaturalVoice(a.name)
+      );
       return notFemale[0];
     }
   }
   if (matches.length === 0) return undefined;
-  matches.sort((a, b) => scoreNaturalVoice(b.name) - scoreNaturalVoice(a.name));
+  matches.sort(
+    (a, b) =>
+      scoreSoftWarmVoice(b.name) - scoreSoftWarmVoice(a.name) ||
+      scoreNaturalVoice(b.name) - scoreNaturalVoice(a.name)
+  );
   return matches[0];
 }
 
@@ -92,4 +112,23 @@ export function selectVoiceByGender(
 ): SpeechSynthesisVoice | null {
   if (voices.length === 0) return null;
   return findVoiceByGender(voices, gender) || null;
+}
+
+/** Deep male voices (Ralph, Bruce, Daniel, David) — Arnold Schwarzenegger style */
+const DEEP_MALE_VOICE_PATTERNS = /ralph|bruce|daniel|david|fred|paul|george|nick/i;
+
+export function findVoiceDeepMale(voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice | undefined {
+  const deep = voices.filter(
+    (v) => DEEP_MALE_VOICE_PATTERNS.test(v.name) && !FEMALE_VOICE_PATTERNS.test(v.name)
+  );
+  if (deep.length > 0) {
+    deep.sort((a, b) => scoreNaturalVoice(b.name) - scoreNaturalVoice(a.name));
+    return deep[0];
+  }
+  return findVoiceByGender(voices, 'male');
+}
+
+export function selectVoiceDeepMale(voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice | null {
+  if (voices.length === 0) return null;
+  return findVoiceDeepMale(voices) || null;
 }
