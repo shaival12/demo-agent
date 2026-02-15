@@ -1,7 +1,42 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Upload, Link, Video } from 'lucide-react';
+import type { Avatar } from '../types/avatar';
 
-export function VideoPlayer() {
+function AvatarTalkingVideo({
+  src,
+  alt,
+  isPlaying,
+}: {
+  src: string;
+  alt: string;
+  isPlaying: boolean;
+}) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (isPlaying) video.play().catch(() => {});
+    else video.pause();
+  }, [isPlaying]);
+  return (
+    <video
+      ref={videoRef}
+      src={src}
+      muted
+      loop
+      playsInline
+      className="w-full h-full object-cover"
+      aria-label={alt}
+    />
+  );
+}
+
+interface VideoPlayerProps {
+  selectedAvatar?: Avatar | null;
+  isSpeaking?: boolean;
+}
+
+export function VideoPlayer({ selectedAvatar, isSpeaking }: VideoPlayerProps) {
   const [videoSource, setVideoSource] = useState<string>('');
   const [videoUrl, setVideoUrl] = useState<string>('');
   const [sourceType, setSourceType] = useState<'upload' | 'url'>('upload');
@@ -46,8 +81,44 @@ export function VideoPlayer() {
 
       <div className="flex-1 flex flex-col">
         {!videoSource ? (
-          <div className="flex-1 flex items-center justify-center p-8">
-            <div className="w-full max-w-md space-y-6">
+          <div className="flex-1 flex flex-col items-center justify-center p-8">
+            {selectedAvatar &&
+            (selectedAvatar.imageUrl ||
+              selectedAvatar.talkingVideoUrl ||
+              selectedAvatar.talkingGifUrl) ? (
+              <div className="flex flex-col items-center gap-4">
+                <div className="w-48 h-48 md:w-64 md:h-64 rounded-full overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200 ring-4 ring-white shadow-2xl">
+                  {isSpeaking &&
+                  (selectedAvatar.talkingVideoUrl ||
+                    selectedAvatar.talkingGifUrl) ? (
+                    selectedAvatar.talkingVideoUrl ? (
+                      <AvatarTalkingVideo
+                        src={selectedAvatar.talkingVideoUrl}
+                        alt={`${selectedAvatar.name} talking`}
+                        isPlaying={isSpeaking}
+                      />
+                    ) : (
+                      <img
+                        src={selectedAvatar.talkingGifUrl}
+                        alt={`${selectedAvatar.name} talking`}
+                        className="w-full h-full object-cover"
+                      />
+                    )
+                  ) : selectedAvatar.imageUrl ? (
+                    <img
+                      src={selectedAvatar.imageUrl}
+                      alt={selectedAvatar.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : null}
+                </div>
+                <p className="text-sm font-medium text-gray-600">
+                  {selectedAvatar.name}
+                  {isSpeaking ? ' is speaking...' : ''}
+                </p>
+              </div>
+            ) : null}
+            <div className="w-full max-w-md space-y-6 mt-6">
               <div className="text-center">
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 mb-4">
                   <Video className="w-8 h-8 text-slate-400" />

@@ -10,6 +10,10 @@ export interface Avatar {
   voiceIndex?: number;
   accent?: AvatarAccent;
   imageUrl?: string;
+  /** Animated talking-head GIF shown when this avatar is speaking (lip-sync style) */
+  talkingGifUrl?: string;
+  /** Real-person talking video (mp4); plays when speaking, overrides talkingGifUrl if set */
+  talkingVideoUrl?: string;
   voiceGender?: 'male' | 'female';
 }
 

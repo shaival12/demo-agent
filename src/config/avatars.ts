@@ -10,18 +10,10 @@ export const avatars: Avatar[] = [
     pitch: 1.1,
     voiceIndex: 0,
     accent: 'default',
+    voiceGender: 'female',
     imageUrl: 'https://randomuser.me/api/portraits/women/44.jpg',
-  },
-  {
-    id: 'emma',
-    name: 'Emma',
-    voiceStyle: 'Confident',
-    color: 'from-emerald-400 to-teal-500',
-    rate: 0.95,
-    pitch: 1.0,
-    voiceIndex: 1,
-    accent: 'british',
-    imageUrl: 'https://randomuser.me/api/portraits/women/68.jpg',
+    talkingVideoUrl:
+      'https://videos.pexels.com/video-files/5442623/5442623-hd_1920_1080_25fps.mp4',
   },
   {
     id: 'james',
@@ -30,9 +22,11 @@ export const avatars: Avatar[] = [
     color: 'from-blue-400 to-indigo-500',
     rate: 0.9,
     pitch: 0.9,
-    voiceIndex: 2,
+    voiceIndex: 1,
     accent: 'default',
     voiceGender: 'male',
     imageUrl: 'https://randomuser.me/api/portraits/men/32.jpg',
+    talkingVideoUrl:
+      'https://videos.pexels.com/video-files/5439086/5439086-hd_1920_1080_25fps.mp4',
   },
 ];

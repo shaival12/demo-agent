@@ -82,7 +82,10 @@ function App() {
             </aside>
 
             <section className="flex-1 overflow-hidden">
-              <VideoPlayer />
+              <VideoPlayer
+                selectedAvatar={selectedAvatar}
+                isSpeaking={isSpeaking}
+              />
             </section>
           </div>
         </main>

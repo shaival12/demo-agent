@@ -9,7 +9,13 @@ export function findVoiceByAccent(
   };
 
   if (accent === 'default') {
-    return voices.find((v) => v.default) || voices[0];
+    const def = voices.find((v) => v.default);
+    if (def) return def;
+    // Prefer natural/enhanced voices when no default
+    const sorted = [...voices].sort(
+      (a, b) => scoreNaturalVoice(b.name) - scoreNaturalVoice(a.name)
+    );
+    return sorted[0] || voices[0];
   }
 
   const pattern = accentPatterns[accent];
@@ -38,15 +44,46 @@ export function selectVoiceByAccent(
   return findVoiceByAccent(voices, accent) || null;
 }
 
-const MALE_VOICE_PATTERNS = /male|daniel|david|alex|fred|paul|ralph|samuel|tom|george|james|mark|nick/i;
-const FEMALE_VOICE_PATTERNS = /female|samantha|karen|victoria|alice|emma|susan|moira|kate|fiona|victoria|ava|zira/i;
+const MALE_VOICE_PATTERNS =
+  /male|daniel|david|alex|fred|paul|ralph|samuel|tom|george|james|mark|nick|bruce|henry|oliver|eddy|aaron|evan|nathan|reed|austin|logan|tyler|mason/i;
+const FEMALE_VOICE_PATTERNS =
+  /female|samantha|karen|victoria|alice|emma|susan|moira|kate|fiona|ava|zira|veena|tessa|naomi|siri|karen|helen|lucy|sarah|emily|female/i;
+
+/**
+ * Prefer voices that sound more natural (Enhanced, Premium, Google, etc.).
+ * For celebrity-style or custom voices, use an external TTS API (e.g. ElevenLabs, Play.ht).
+ */
+const NATURAL_VOICE_PATTERNS = /enhanced|premium|natural|google|quality|eloquent/i;
+
+function scoreNaturalVoice(name: string): number {
+  if (NATURAL_VOICE_PATTERNS.test(name)) return 2;
+  if (/microsoft|apple/i.test(name)) return 1;
+  return 0;
+}
 
 export function findVoiceByGender(
   voices: SpeechSynthesisVoice[],
   gender: 'male' | 'female'
 ): SpeechSynthesisVoice | undefined {
-  const pattern = gender === 'male' ? MALE_VOICE_PATTERNS : FEMALE_VOICE_PATTERNS;
-  return voices.find((v) => pattern.test(v.name));
+  const includePattern = gender === 'male' ? MALE_VOICE_PATTERNS : FEMALE_VOICE_PATTERNS;
+  const excludePattern = gender === 'male' ? FEMALE_VOICE_PATTERNS : MALE_VOICE_PATTERNS;
+  let matches = voices.filter(
+    (v) => includePattern.test(v.name) && !excludePattern.test(v.name)
+  );
+  if (matches.length === 0) {
+    matches = voices.filter((v) => includePattern.test(v.name));
+  }
+  if (matches.length === 0 && gender === 'male') {
+    // Fallback: use any voice that doesn't sound female (avoids wrong gender)
+    const notFemale = voices.filter((v) => !excludePattern.test(v.name));
+    if (notFemale.length > 0) {
+      notFemale.sort((a, b) => scoreNaturalVoice(b.name) - scoreNaturalVoice(a.name));
+      return notFemale[0];
+    }
+  }
+  if (matches.length === 0) return undefined;
+  matches.sort((a, b) => scoreNaturalVoice(b.name) - scoreNaturalVoice(a.name));
+  return matches[0];
 }
 
 export function selectVoiceByGender(

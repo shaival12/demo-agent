@@ -1,5 +1,36 @@
+import { useRef, useEffect } from 'react';
 import { Avatar } from '../types/avatar';
 import { User } from 'lucide-react';
+
+function AvatarTalkingVideo({
+  src,
+  alt,
+}: {
+  src: string;
+  alt: string;
+}) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    const video = videoRef.current;
+    if (video) {
+      video.play().catch(() => {});
+    }
+    return () => {
+      video?.pause();
+    };
+  }, [src]);
+  return (
+    <video
+      ref={videoRef}
+      src={src}
+      muted
+      loop
+      playsInline
+      className="w-full h-full object-cover"
+      aria-label={alt}
+    />
+  );
+}
 
 interface AvatarSelectorProps {
   avatars: Avatar[];
@@ -19,9 +50,11 @@ export function AvatarSelector({
       <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
         Select Avatar
       </h2>
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-2 gap-2">
         {avatars.map((avatar) => {
           const isSelected = avatar.id === selectedAvatarId;
+          const showTalking = isSelected && isSpeaking;
+          const talkingMedia = avatar.talkingVideoUrl || avatar.talkingGifUrl;
           return (
             <button
               key={avatar.id}
@@ -36,10 +69,23 @@ export function AvatarSelector({
             >
               <div
                 className={`w-14 h-14 rounded-full overflow-hidden bg-gradient-to-br ${avatar.color} flex items-center justify-center mb-2 ring-2 ring-white/50 ${
-                  isSelected && isSpeaking ? 'animate-pulse' : ''
+                  showTalking ? 'animate-pulse' : ''
                 }`}
               >
-                {avatar.imageUrl ? (
+                {showTalking && talkingMedia ? (
+                  avatar.talkingVideoUrl ? (
+                    <AvatarTalkingVideo
+                      src={avatar.talkingVideoUrl}
+                      alt={`${avatar.name} talking`}
+                    />
+                  ) : (
+                    <img
+                      src={avatar.talkingGifUrl}
+                      alt={`${avatar.name} talking`}
+                      className="w-full h-full object-cover"
+                    />
+                  )
+                ) : avatar.imageUrl ? (
                   <img
                     src={avatar.imageUrl}
                     alt={avatar.name}

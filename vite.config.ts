@@ -8,6 +8,7 @@ export default defineConfig({
     port: 5173,
     strictPort: false,
     open: true,
+    cors: true,
   },
   preview: {
     port: 4173,
