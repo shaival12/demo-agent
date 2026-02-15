@@ -1,3 +1,5 @@
+export type AvatarAccent = 'italian' | 'british' | 'australian' | 'default';
+
 export interface Avatar {
   id: string;
   name: string;
@@ -6,6 +8,9 @@ export interface Avatar {
   rate: number;
   pitch: number;
   voiceIndex?: number;
+  accent?: AvatarAccent;
+  imageUrl?: string;
+  voiceGender?: 'male' | 'female';
 }
 
 export interface SpeechConfig {

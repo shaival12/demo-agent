@@ -4,7 +4,7 @@ import { ControlPanel } from './components/ControlPanel';
 import { VideoPlayer } from './components/VideoPlayer';
 import { avatars } from './config/avatars';
 import { useSpeechSynthesis } from './hooks/useSpeechSynthesis';
-import { selectVoiceByAccent } from './utils/voiceSelector';
+import { selectVoiceByAccent, selectVoiceByGender } from './utils/voiceSelector';
 
 function App() {
   const [selectedAvatarId, setSelectedAvatarId] = useState(avatars[0].id);
@@ -16,8 +16,11 @@ function App() {
   const selectedAvatar = avatars.find((a) => a.id === selectedAvatarId) || avatars[0];
 
   const handleSpeak = () => {
-    const accentVoice = selectVoiceByAccent(voices, selectedAvatar.accent);
-    const voice = accentVoice || voices[selectedAvatar.voiceIndex || 0] || voices[0];
+    const genderVoice =
+      selectedAvatar.voiceGender && selectVoiceByGender(voices, selectedAvatar.voiceGender);
+    const accentVoice = selectVoiceByAccent(voices, selectedAvatar.accent ?? 'default');
+    const voice =
+      genderVoice || accentVoice || voices[selectedAvatar.voiceIndex ?? 0] || voices[0];
     speak(
       script,
       {
@@ -41,7 +44,7 @@ function App() {
         <header className="bg-white border-b border-gray-200 shadow-sm">
           <div className="px-6 py-4">
             <h1 className="text-2xl font-bold text-gray-900">
-              Avatar Agent Demo
+                Demo Agent
             </h1>
             <p className="text-sm text-gray-600 mt-1">
               Select an avatar, write your script, and watch it come to life

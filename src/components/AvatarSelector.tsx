@@ -19,7 +19,7 @@ export function AvatarSelector({
       <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
         Select Avatar
       </h2>
-      <div className="grid grid-cols-5 gap-2">
+      <div className="grid grid-cols-3 gap-2">
         {avatars.map((avatar) => {
           const isSelected = avatar.id === selectedAvatarId;
           return (
@@ -35,11 +35,19 @@ export function AvatarSelector({
               disabled={isSpeaking}
             >
               <div
-                className={`w-12 h-12 rounded-full bg-gradient-to-br ${avatar.color} flex items-center justify-center mb-2 ${
+                className={`w-14 h-14 rounded-full overflow-hidden bg-gradient-to-br ${avatar.color} flex items-center justify-center mb-2 ring-2 ring-white/50 ${
                   isSelected && isSpeaking ? 'animate-pulse' : ''
                 }`}
               >
-                <User className="w-6 h-6 text-white" />
+                {avatar.imageUrl ? (
+                  <img
+                    src={avatar.imageUrl}
+                    alt={avatar.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <User className="w-7 h-7 text-white" />
+                )}
               </div>
               <span className="text-xs font-medium text-gray-900">
                 {avatar.name}
