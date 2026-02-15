@@ -4,6 +4,7 @@ import { ControlPanel } from './components/ControlPanel';
 import { VideoPlayer } from './components/VideoPlayer';
 import { avatars } from './config/avatars';
 import { useSpeechSynthesis } from './hooks/useSpeechSynthesis';
+import { selectVoiceByAccent } from './utils/voiceSelector';
 
 function App() {
   const [selectedAvatarId, setSelectedAvatarId] = useState(avatars[0].id);
@@ -15,7 +16,8 @@ function App() {
   const selectedAvatar = avatars.find((a) => a.id === selectedAvatarId) || avatars[0];
 
   const handleSpeak = () => {
-    const voice = voices[selectedAvatar.voiceIndex || 0] || voices[0];
+    const accentVoice = selectVoiceByAccent(voices, selectedAvatar.accent);
+    const voice = accentVoice || voices[selectedAvatar.voiceIndex || 0] || voices[0];
     speak(
       script,
       {
