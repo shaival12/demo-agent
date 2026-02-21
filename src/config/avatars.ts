@@ -32,13 +32,14 @@ export const avatars: Avatar[] = [
   {
     id: 'arnold',
     name: 'Arnold',
-    voiceStyle: 'Warm',
+    voiceStyle: 'Deep French',
     color: 'from-amber-600 to-orange-700',
     rate: 0.9,
     pitch: 0.9,
     voiceIndex: 2,
-    accent: 'australian',
+    accent: 'french',
     voiceGender: 'male',
+    voicePreference: 'deep',
     imageUrl: 'https://randomuser.me/api/portraits/men/22.jpg',
     talkingVideoUrl:
       'https://videos.pexels.com/video-files/7262257/7262257-hd_1920_1080_25fps.mp4',

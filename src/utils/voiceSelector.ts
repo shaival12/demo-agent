@@ -1,4 +1,4 @@
-export type Accent = 'italian' | 'british' | 'australian' | 'german' | 'default';
+export type Accent = 'italian' | 'british' | 'australian' | 'german' | 'french' | 'default';
 
 export function findVoiceByAccent(
   voices: SpeechSynthesisVoice[],
@@ -9,6 +9,7 @@ export function findVoiceByAccent(
     british: /british|en-GB|en_GB|uk|england/i,
     australian: /australian|au|en-AU|en_AU|australia/i,
     german: /german|de-DE|de_DE|austrian|de-AT|de_AT/i,
+    french: /french|fr-FR|fr_FR|fr-CA|fr_CA|fr/i,
   };
 
   if (accent === 'default') {
@@ -36,6 +37,7 @@ export function findVoiceByAccent(
     if (accent === 'british') return lang.includes('gb') || lang.includes('en-gb');
     if (accent === 'australian') return lang.includes('au') || lang.includes('en-au');
     if (accent === 'german') return lang.startsWith('de');
+    if (accent === 'french') return lang.startsWith('fr');
     return false;
   });
 
