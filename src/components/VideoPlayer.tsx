@@ -35,9 +35,18 @@ interface VideoPlayerProps {
   selectedAvatar?: Avatar | null;
   isSpeaking?: boolean;
   theme?: 'light' | 'dark';
+  /** Override talking video URL for the selected avatar (e.g. from custom URL field) */
+  effectiveTalkingVideoUrl?: string;
 }
 
-export function VideoPlayer({ selectedAvatar, isSpeaking, theme = 'light' }: VideoPlayerProps) {
+export function VideoPlayer({
+  selectedAvatar,
+  isSpeaking,
+  theme = 'light',
+  effectiveTalkingVideoUrl,
+}: VideoPlayerProps) {
+  const avatarTalkingVideoUrl =
+    effectiveTalkingVideoUrl?.trim() || selectedAvatar?.talkingVideoUrl;
   const [videoSource, setVideoSource] = useState<string>('');
   const [videoUrl, setVideoUrl] = useState<string>('');
   const [sourceType, setSourceType] = useState<'upload' | 'url'>('upload');
@@ -101,7 +110,7 @@ export function VideoPlayer({ selectedAvatar, isSpeaking, theme = 'light' }: Vid
           <div className="flex-1 flex flex-col items-center justify-center p-8">
             {selectedAvatar &&
             (selectedAvatar.imageUrl ||
-              selectedAvatar.talkingVideoUrl ||
+              avatarTalkingVideoUrl ||
               selectedAvatar.talkingGifUrl) ? (
               <div className="flex flex-col items-center gap-4">
                 <div
@@ -112,11 +121,10 @@ export function VideoPlayer({ selectedAvatar, isSpeaking, theme = 'light' }: Vid
                   }`}
                 >
                   {isSpeaking &&
-                  (selectedAvatar.talkingVideoUrl ||
-                    selectedAvatar.talkingGifUrl) ? (
-                    selectedAvatar.talkingVideoUrl ? (
+                  (avatarTalkingVideoUrl || selectedAvatar.talkingGifUrl) ? (
+                    avatarTalkingVideoUrl ? (
                       <AvatarTalkingVideo
-                        src={selectedAvatar.talkingVideoUrl}
+                        src={avatarTalkingVideoUrl}
                         alt={`${selectedAvatar.name} talking`}
                         isPlaying={isSpeaking}
                       />

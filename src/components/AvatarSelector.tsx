@@ -37,6 +37,8 @@ interface AvatarSelectorProps {
   selectedAvatarId: string;
   onSelectAvatar: (avatarId: string) => void;
   isSpeaking: boolean;
+  /** Override talking video URL for the selected avatar (e.g. from custom URL field) */
+  effectiveTalkingVideoUrl?: string;
 }
 
 export function AvatarSelector({
@@ -44,6 +46,7 @@ export function AvatarSelector({
   selectedAvatarId,
   onSelectAvatar,
   isSpeaking,
+  effectiveTalkingVideoUrl,
 }: AvatarSelectorProps) {
   return (
     <div className="space-y-3">
@@ -54,7 +57,11 @@ export function AvatarSelector({
         {avatars.map((avatar) => {
           const isSelected = avatar.id === selectedAvatarId;
           const showTalking = isSelected && isSpeaking;
-          const talkingMedia = avatar.talkingVideoUrl || avatar.talkingGifUrl;
+          const talkingVideoUrl =
+            isSelected && effectiveTalkingVideoUrl
+              ? effectiveTalkingVideoUrl
+              : avatar.talkingVideoUrl;
+          const talkingMedia = talkingVideoUrl || avatar.talkingGifUrl;
           return (
             <button
               key={avatar.id}
@@ -73,9 +80,9 @@ export function AvatarSelector({
                 }`}
               >
                 {showTalking && talkingMedia ? (
-                  avatar.talkingVideoUrl ? (
+                  talkingVideoUrl ? (
                     <AvatarTalkingVideo
-                      src={avatar.talkingVideoUrl}
+                      src={talkingVideoUrl}
                       alt={`${avatar.name} talking`}
                     />
                   ) : (

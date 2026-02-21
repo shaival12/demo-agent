@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { AvatarSelector } from './components/AvatarSelector';
+import { AvatarVideoUrlEditor } from './components/AvatarVideoUrlEditor';
 import { ControlPanel } from './components/ControlPanel';
 import { VideoPlayer } from './components/VideoPlayer';
 import { avatars } from './config/avatars';
@@ -17,10 +18,17 @@ function App() {
   const [script, setScript] = useState('');
   const [instructions, setInstructions] = useState('');
   const [theme, setTheme] = useState<Theme>('light');
+  const [customTalkingVideoUrls, setCustomTalkingVideoUrls] = useState<Record<string, string>>({});
 
   const { voices, isSpeaking, isPaused, speak, pause, resume, stop } = useSpeechSynthesis();
 
   const selectedAvatar = avatars.find((a) => a.id === selectedAvatarId) || avatars[0];
+  const effectiveTalkingVideoUrl =
+    customTalkingVideoUrls[selectedAvatarId]?.trim() || selectedAvatar.talkingVideoUrl;
+
+  const setCustomTalkingVideoUrl = (avatarId: string, url: string) => {
+    setCustomTalkingVideoUrls((prev) => (url.trim() ? { ...prev, [avatarId]: url } : { ...prev, [avatarId]: '' }));
+  };
 
   const handleSpeak = () => {
     const deepMaleVoice =
@@ -143,7 +151,18 @@ function App() {
                   selectedAvatarId={selectedAvatarId}
                   onSelectAvatar={setSelectedAvatarId}
                   isSpeaking={isSpeaking}
+                  effectiveTalkingVideoUrl={effectiveTalkingVideoUrl}
                 />
+                <div
+                  className={`mt-4 pt-4 border-t ${theme === 'dark' ? 'border-slate-700' : 'border-gray-200'}`}
+                >
+                  <AvatarVideoUrlEditor
+                    avatarName={selectedAvatar.name}
+                    customUrl={customTalkingVideoUrls[selectedAvatarId] ?? ''}
+                    onCustomUrlChange={(url) => setCustomTalkingVideoUrl(selectedAvatarId, url)}
+                    theme={theme}
+                  />
+                </div>
               </div>
 
               <div
@@ -171,7 +190,12 @@ function App() {
             </aside>
 
             <section className="flex-1 overflow-hidden">
-              <VideoPlayer selectedAvatar={selectedAvatar} isSpeaking={isSpeaking} theme={theme} />
+              <VideoPlayer
+                selectedAvatar={selectedAvatar}
+                isSpeaking={isSpeaking}
+                theme={theme}
+                effectiveTalkingVideoUrl={effectiveTalkingVideoUrl}
+              />
             </section>
           </div>
         </main>
