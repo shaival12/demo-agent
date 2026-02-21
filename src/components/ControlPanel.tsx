@@ -12,7 +12,11 @@ interface ControlPanelProps {
   onReplay: () => void;
   isSpeaking: boolean;
   isPaused: boolean;
+  theme?: 'light' | 'dark';
 }
+
+const textareaBase =
+  'w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none border';
 
 export function ControlPanel({
   script,
@@ -26,8 +30,13 @@ export function ControlPanel({
   onReplay,
   isSpeaking,
   isPaused,
+  theme = 'light',
 }: ControlPanelProps) {
   const canSpeak = script.trim().length > 0 && !isSpeaking;
+  const textareaClass =
+    theme === 'dark'
+      ? `${textareaBase} border-slate-600 bg-slate-100 text-gray-900 placeholder:text-gray-500`
+      : `${textareaBase} border-gray-300`;
 
   return (
     <div className="space-y-6">
@@ -102,7 +111,7 @@ export function ControlPanel({
           onChange={(e) => onScriptChange(e.target.value)}
           placeholder="Type what the avatar should say…"
           rows={6}
-          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+          className={textareaClass}
         />
         <div className="mt-1 text-xs text-gray-500 text-right">
           {script.length} characters
@@ -122,7 +131,7 @@ export function ControlPanel({
           onChange={(e) => onInstructionsChange(e.target.value)}
           placeholder="E.g., 'Speak like a friendly sales engineer' or 'Slow pace, confident tone, short pauses after sentences'"
           rows={4}
-          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+          className={textareaClass}
         />
       </div>
     </div>

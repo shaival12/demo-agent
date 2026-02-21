@@ -1,4 +1,4 @@
-export type AvatarAccent = 'italian' | 'british' | 'australian' | 'german' | 'default';
+export type AvatarAccent = 'italian' | 'british' | 'australian' | 'german' | 'french' | 'default';
 
 export interface Avatar {
   id: string;
