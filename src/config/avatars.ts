@@ -4,10 +4,10 @@ export const avatars: Avatar[] = [
   {
     id: 'sarah',
     name: 'Sarah',
-    voiceStyle: 'Warm',
+    voiceStyle: 'Warm & melodic',
     color: 'from-rose-400 to-pink-500',
-    rate: 0.92,
-    pitch: 1.05,
+    rate: 0.9,
+    pitch: 1.12,
     voiceIndex: 0,
     accent: 'default',
     voiceGender: 'female',
