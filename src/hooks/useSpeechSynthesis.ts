@@ -5,6 +5,8 @@ export function useSpeechSynthesis() {
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [currentCharIndex, setCurrentCharIndex] = useState<number | null>(null);
+  const [spokenText, setSpokenText] = useState<string>('');
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   useEffect(() => {
@@ -56,6 +58,8 @@ export function useSpeechSynthesis() {
       : config;
 
     const utterance = new SpeechSynthesisUtterance(text);
+    setSpokenText(text);
+    setCurrentCharIndex(0);
     utterance.rate = finalConfig.rate;
     utterance.pitch = finalConfig.pitch;
     utterance.volume = finalConfig.volume;
@@ -71,14 +75,25 @@ export function useSpeechSynthesis() {
       setIsPaused(false);
     };
 
+    utterance.onboundary = (event: SpeechSynthesisEvent) => {
+      // Track approximate position within the spoken text so we can highlight it
+      if (typeof event.charIndex === 'number') {
+        setCurrentCharIndex(event.charIndex);
+      }
+    };
+
     utterance.onend = () => {
       setIsSpeaking(false);
       setIsPaused(false);
+      setCurrentCharIndex(null);
+      setSpokenText('');
     };
 
     utterance.onerror = () => {
       setIsSpeaking(false);
       setIsPaused(false);
+      setCurrentCharIndex(null);
+      setSpokenText('');
     };
 
     utteranceRef.current = utterance;
@@ -103,12 +118,16 @@ export function useSpeechSynthesis() {
     window.speechSynthesis.cancel();
     setIsSpeaking(false);
     setIsPaused(false);
+    setCurrentCharIndex(null);
+    setSpokenText('');
   };
 
   return {
     voices,
     isSpeaking,
     isPaused,
+    currentCharIndex,
+    spokenText,
     speak,
     pause,
     resume,

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Film } from 'lucide-react';
 import { AvatarSelector } from './components/AvatarSelector';
 import { AvatarVideoUrlEditor } from './components/AvatarVideoUrlEditor';
 import { ControlPanel } from './components/ControlPanel';
@@ -18,9 +19,22 @@ function App() {
   const [script, setScript] = useState('');
   const [instructions, setInstructions] = useState('');
   const [theme, setTheme] = useState<Theme>('light');
+  const [cinematic, setCinematic] = useState(false);
   const [customTalkingVideoUrls, setCustomTalkingVideoUrls] = useState<Record<string, string>>({});
 
-  const { voices, isSpeaking, isPaused, speak, pause, resume, stop } = useSpeechSynthesis();
+  const {
+    voices,
+    isSpeaking,
+    isPaused,
+    currentCharIndex,
+    spokenText,
+    speak,
+    pause,
+    resume,
+    stop,
+  } = useSpeechSynthesis();
+
+  const effectiveTheme: Theme = cinematic ? 'dark' : theme;
 
   const selectedAvatar = avatars.find((a) => a.id === selectedAvatarId) || avatars[0];
   const effectiveTalkingVideoUrl =
@@ -62,24 +76,26 @@ function App() {
   return (
     <div
       className={`min-h-screen transition-colors duration-300 ${
-        theme === 'dark'
+        effectiveTheme === 'dark'
           ? 'bg-slate-950 text-slate-100'
           : 'bg-gradient-to-br from-slate-50 to-slate-100 text-slate-900'
       }`}
     >
       <div className="h-screen flex flex-col">
         <header
-          className={
-            theme === 'dark'
-              ? 'bg-slate-900/90 border-b border-slate-800 shadow-sm backdrop-blur'
+          className={`transition-all duration-300 ${
+            cinematic ? 'pointer-events-none' : ''
+          } ${
+            effectiveTheme === 'dark'
+              ? 'bg-gradient-to-r from-slate-800 to-slate-950 border-b border-slate-900 shadow-sm backdrop-blur'
               : 'bg-white border-b border-gray-200 shadow-sm'
-          }
+          }`}
         >
           <div className="px-6 py-4 flex flex-wrap items-center justify-between gap-4">
             <div>
               <h1
                 className={
-                  theme === 'dark'
+                  effectiveTheme === 'dark'
                     ? 'text-2xl font-bold text-slate-50'
                     : 'text-2xl font-bold text-gray-900'
                 }
@@ -88,7 +104,7 @@ function App() {
               </h1>
               <p
                 className={
-                  theme === 'dark'
+                  effectiveTheme === 'dark'
                     ? 'text-sm text-slate-400 mt-1'
                     : 'text-sm text-gray-600 mt-1'
                 }
@@ -99,16 +115,32 @@ function App() {
             <div className="flex items-center gap-2">
               <span
                 className={
-                  theme === 'dark'
+                  effectiveTheme === 'dark'
                     ? 'text-sm font-medium text-slate-300'
                     : 'text-sm font-medium text-gray-600'
                 }
               >
                 Theme
               </span>
+              <button
+                type="button"
+                onClick={() => setCinematic((v) => !v)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                  cinematic
+                    ? effectiveTheme === 'dark'
+                      ? 'bg-amber-600/80 text-white'
+                      : 'bg-amber-500 text-white'
+                    : effectiveTheme === 'dark'
+                      ? 'text-slate-300 hover:bg-slate-800 hover:text-slate-100'
+                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                }`}
+              >
+                <Film className="w-4 h-4" />
+                Cinematic
+              </button>
               <div
                 className={
-                  theme === 'dark'
+                  effectiveTheme === 'dark'
                     ? 'flex rounded-lg border border-slate-700 overflow-hidden bg-slate-900/80'
                     : 'flex rounded-lg border border-gray-200 overflow-hidden bg-gray-50'
                 }
@@ -136,15 +168,20 @@ function App() {
           </div>
         </header>
 
-        <main className="flex-1 overflow-hidden">
-          <div className="h-full flex flex-col lg:flex-row gap-6 p-6">
-            <aside className="w-full lg:w-1/4 flex flex-col gap-6 overflow-y-auto">
+        <main className="flex-1 overflow-hidden min-h-0">
+          <div className="h-full flex flex-col lg:flex-row gap-6 p-6 min-h-0">
+            <aside
+              className={`w-full lg:w-1/4 flex flex-col gap-6 min-h-0 min-w-0 transition-all duration-300 ${
+                cinematic ? 'pointer-events-none' : ''
+              }`}
+            >
+              {/* Avatar section: never scrolls, always visible */}
               <div
-                className={
-                  theme === 'dark'
+                className={`flex-shrink-0 ${
+                  effectiveTheme === 'dark'
                     ? 'bg-slate-900/80 border border-slate-800 rounded-2xl shadow-lg p-6'
                     : 'bg-white rounded-2xl shadow-lg p-6'
-                }
+                }`}
               >
                 <AvatarSelector
                   avatars={avatars}
@@ -154,25 +191,29 @@ function App() {
                   effectiveTalkingVideoUrl={effectiveTalkingVideoUrl}
                 />
                 <div
-                  className={`mt-4 pt-4 border-t ${theme === 'dark' ? 'border-slate-700' : 'border-gray-200'}`}
+                  className={`mt-4 pt-4 border-t ${
+                    effectiveTheme === 'dark' ? 'border-slate-700' : 'border-gray-200'
+                  }`}
                 >
                   <AvatarVideoUrlEditor
                     avatarName={selectedAvatar.name}
                     customUrl={customTalkingVideoUrls[selectedAvatarId] ?? ''}
                     onCustomUrlChange={(url) => setCustomTalkingVideoUrl(selectedAvatarId, url)}
-                    theme={theme}
+                    theme={effectiveTheme}
                   />
                 </div>
               </div>
 
-              <div
-                className={
-                  theme === 'dark'
-                    ? 'bg-slate-900/80 border border-slate-800 rounded-2xl shadow-lg p-6'
-                    : 'bg-white rounded-2xl shadow-lg p-6'
-                }
-              >
-                <ControlPanel
+              {/* Script / controls: only this part scrolls */}
+              <div className="flex-1 min-h-0 overflow-y-auto">
+                <div
+                  className={
+                    effectiveTheme === 'dark'
+                      ? 'bg-slate-900/80 border border-slate-800 rounded-2xl shadow-lg p-6'
+                      : 'bg-white rounded-2xl shadow-lg p-6'
+                  }
+                >
+                  <ControlPanel
                   script={script}
                   instructions={instructions}
                   onScriptChange={setScript}
@@ -184,16 +225,28 @@ function App() {
                   onReplay={handleReplay}
                   isSpeaking={isSpeaking}
                   isPaused={isPaused}
-                  theme={theme}
+                  theme={effectiveTheme}
+                  spokenText={spokenText}
+                  currentCharIndex={currentCharIndex}
                 />
+                </div>
               </div>
             </aside>
 
-            <section className="flex-1 overflow-hidden">
+            <section className="flex-1 overflow-hidden relative">
+              {cinematic && (
+                <button
+                  type="button"
+                  onClick={() => setCinematic(false)}
+                  className="absolute top-3 right-3 z-20 px-4 py-2 rounded-lg text-sm font-medium bg-black/70 text-white hover:bg-black/90 shadow-lg transition-colors"
+                >
+                  Exit cinematic
+                </button>
+              )}
               <VideoPlayer
                 selectedAvatar={selectedAvatar}
                 isSpeaking={isSpeaking}
-                theme={theme}
+                theme={effectiveTheme}
                 effectiveTalkingVideoUrl={effectiveTalkingVideoUrl}
               />
             </section>

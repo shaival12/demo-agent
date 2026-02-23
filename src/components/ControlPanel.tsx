@@ -13,6 +13,9 @@ interface ControlPanelProps {
   isSpeaking: boolean;
   isPaused: boolean;
   theme?: 'light' | 'dark';
+  /** Live speech position for subtitle-style highlighting */
+  spokenText?: string;
+  currentCharIndex?: number | null;
 }
 
 const textareaBase =
@@ -31,12 +34,51 @@ export function ControlPanel({
   isSpeaking,
   isPaused,
   theme = 'light',
+  spokenText,
+  currentCharIndex,
 }: ControlPanelProps) {
   const canSpeak = script.trim().length > 0 && !isSpeaking;
   const textareaClass =
     theme === 'dark'
       ? `${textareaBase} border-slate-600 bg-slate-100 text-gray-900 placeholder:text-gray-500`
       : `${textareaBase} border-gray-300`;
+
+  const subtitleSource = (spokenText && spokenText.length > 0 ? spokenText : script) || '';
+
+  let before = '';
+  let highlighted = '';
+  let after = '';
+
+  if (subtitleSource && typeof currentCharIndex === 'number' && currentCharIndex >= 0) {
+    const index = Math.min(currentCharIndex, subtitleSource.length - 1);
+
+    type Range = { start: number; end: number };
+    const ranges: Range[] = [];
+    let start = 0;
+
+    for (let i = 0; i < subtitleSource.length; i += 1) {
+      const ch = subtitleSource[i];
+      const isLastChar = i === subtitleSource.length - 1;
+      if (ch === '.' || ch === '!' || ch === '?' || isLastChar) {
+        let end = isLastChar ? i + 1 : i + 1;
+        // Include trailing spaces in the current sentence
+        while (end < subtitleSource.length && subtitleSource[end] === ' ') {
+          end += 1;
+        }
+        ranges.push({ start, end });
+        start = end;
+      }
+    }
+
+    const currentRange =
+      ranges.find((r) => index >= r.start && index < r.end) || ranges[ranges.length - 1];
+
+    if (currentRange) {
+      before = subtitleSource.slice(0, currentRange.start);
+      highlighted = subtitleSource.slice(currentRange.start, currentRange.end);
+      after = subtitleSource.slice(currentRange.end);
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -113,9 +155,39 @@ export function ControlPanel({
           rows={6}
           className={textareaClass}
         />
-        <div className="mt-1 text-xs text-gray-500 text-right">
-          {script.length} characters
+        <div className="mt-1 flex items-center justify-between text-xs text-gray-500">
+          <span>{script.length} characters</span>
+          {subtitleSource && isSpeaking && highlighted && (
+            <span className="text-blue-600 font-medium">Showing live sentence highlight</span>
+          )}
         </div>
+
+        {subtitleSource && highlighted && (
+          <div className="mt-3">
+            <div className="text-xs font-semibold text-gray-600 mb-1">
+              Subtitle preview
+            </div>
+            <div
+              className={`text-sm leading-relaxed rounded-lg border px-3 py-2 whitespace-pre-wrap ${
+                theme === 'dark'
+                  ? 'bg-slate-900 border-slate-700 text-slate-100'
+                  : 'bg-gray-50 border-gray-200 text-gray-800'
+              }`}
+            >
+              <span>{before}</span>
+              <span
+                className={
+                  theme === 'dark'
+                    ? 'bg-yellow-400/40 rounded px-0.5'
+                    : 'bg-yellow-200 rounded px-0.5'
+                }
+              >
+                {highlighted}
+              </span>
+              <span>{after}</span>
+            </div>
+          </div>
+        )}
       </div>
 
       <div>
